@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Wide Tetris</title>
+</head>
+<body>
+    <header id="header">   
+        <h1 id="timer">00:00</h1>
+        <div id="main_button_container">
+            <button class="game_button start_button" id="main_button" onclick='menu_button(this)'>Start Game</button>
+        </div>
+        <nav>
+            <button type="nav">
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 82 84" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="42" width="20" height="20"/>
+                    <rect x="22" y="42" width="20" height="20"/>
+                    <rect x="42" y="42" width="20" height="20"/>
+                    <rect x="62" y="42" width="20" height="20"/>
+                </svg>
+            </button>
+            <button type="nav">
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 82 84" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="40" y="2" width="20" height="20"/>
+                    <rect x="40" y="22" width="20" height="20"/>
+                    <rect x="40" y="42" width="20" height="20"/>
+                    <rect x="40" y="62" width="20" height="20"/>
+                </svg>
+            </button>
+            <button type="nav">
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 82 84" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Top rectangles -->
+                    <rect x="22" y="2" width="20" height="20"/>
+                    <rect x="42" y="2" width="20" height="20"/>
+                    
+                    <!-- Bottom rectangles -->
+                    <rect x="22" y="62" width="20" height="20"/>
+                    <rect x="42" y="62" width="20" height="20"/>
+                    
+                    <!-- Side rectangles -->
+                    <rect x="2" y="22" width="20" height="20"/>
+                    <rect x="62" y="22" width="20" height="20"/>
+                    <rect x="2" y="42" width="20" height="20"/>
+                    <rect x="62" y="42" width="20" height="20"/>
+                </svg>
+            </button>
+            <button type="nav">
+                <svg fill="#000000" width="800" height="800" viewBox="0 0 82 84" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="62" width="20" height="20"/>
+                    <rect x="22" y="62" width="20" height="20"/>
+                    <rect x="42" y="62" width="20" height="20"/>
+                    <rect x="62" y="62" width="20" height="20"/>
+                    <rect x="22" y="42" width="20" height="20"/>
+                </svg>
+            </button>
+            <button type="nav">
+                <svg fill="#000000" width="800" height="800" viewBox="0 0 82 84" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="22" y="62" width="20" height="20"/>
+                    <rect x="42" y="62" width="20" height="20"/>
+                    <rect x="42" y="42" width="20" height="20"/>
+                    <rect x="62" y="22" width="20" height="20"/>
+                </svg>
+            </button>
+        </nav>
+    </header>
+    <main>
+        <aside id="extras"></aside>
+        <div id="grid">
+            <div id='watermark'>
+                <h3>Tetris</h3>
+                <h3>SCORE</h3>
+                <h4 id='score'>0</h4>
+            </div>
+        </div>
+        <aside id="next_shape">
+        </aside>
+    </main>
+    <footer>
+
+    </footer>
+</body>
+</html>
+<script src='js/init.js'></script>
+<script src='js/controller.js'></script>
+<script src='js/Icons.js'></script>

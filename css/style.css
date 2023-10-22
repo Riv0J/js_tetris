@@ -1,0 +1,205 @@
+:root{
+    --main-color: #ffea96;
+    --main-color2: #a5923d;
+    --main-color3: rgb(131, 111, 23);
+    --text-color: #ac1e1e;
+    --hover-text-color: #fb2c2c;
+    --neutral-clear-bg: #fafafa;
+    --neutral-gray-bg: #cacaca;
+    --neutral-dark-bg: #404040;
+    --button_pause1: #b1ff94;
+    --button_pause2: #5eb93d;
+    --button_pause3: #419822;
+}
+
+*{
+    user-select: none;
+}
+body{
+    background: var(--neutral-dark-bg);
+    color: var(--neutral-clear-bg);
+    font-family: 'Barlow', sans-serif;
+}
+nav{
+    padding: 0 1.8rem;
+}
+header{
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0.4rem 1.8rem;
+    background: linear-gradient(to top, #00000022 0%, #ffffff66 100%);
+    z-index: 1000;
+}
+header > * {
+    width: 33%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+header::before{
+    content: '';
+    position: absolute;
+    width: 80%;
+    height: 100%;
+    top: 0.1rem;
+    left: 10%;
+    background-color: transparent;
+    border-bottom: 0.1rem solid black;
+    pointer-events: none;
+}
+h1{
+    font-weight: 500;
+    letter-spacing: 0.2rem;
+    font-size: 1.75rem;
+}
+main{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+button[type=nav]{
+    transition: all 0.25s ease-in-out;
+    background-color: transparent;
+    color: var(--text-color);
+}
+button[type=nav] svg{
+    padding: 0.5rem;
+    transition: all 0.1s ease-in-out;
+    width: 3rem;
+    height: 3rem;
+    aspect-ratio: 1;
+    fill: var(--neutral-clear-bg);
+    stroke:black;
+    stroke-width:2;
+}
+button[type=nav]:hover svg, button[type=nav]:hover{
+    color: var(--hover-text-color);
+    fill: var(--hover-text-color);
+}
+.game_button{
+    position: relative;
+    transition: all 0.2s ease-in-out;
+
+    font-size: 1.5rem;
+    font-weight: 500;
+
+    width: 12rem;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1.5rem;
+    
+    outline: 0.1rem solid black;
+    box-shadow: 0.15rem 0.25rem 0.25rem black;
+    border-bottom-left-radius: 45rem;
+    border-bottom-right-radius: 45rem;
+}
+.game_button:hover{
+    translate: 0 5%;
+    box-shadow: 0.1rem 0.1rem 0.1rem black;
+}
+.start_button, .resume_button{
+    color: var(--neutral-dark-bg);
+    background: linear-gradient(131deg, var(--main-color) 0%, var(--main-color2) 100%);
+}
+.start_button:hover, .resume_button:hover{
+    color: var(--neutral-clear-bg);
+    background: linear-gradient(131deg, var(--main-color) 0%, var(--main-color3) 40%);
+}
+.pause_button{
+    color: var(--neutral-dark-bg);
+    background: linear-gradient(131deg, var(--button_pause1) 0%, var(--button_pause2) 100%);
+}
+.pause_button:hover{
+    color: var(--neutral-clear-bg);
+    background: linear-gradient(131deg, var(--button_pause1) 0%, var(--button_pause3) 40%);
+}
+button{
+    cursor: pointer;
+}
+rect{
+    rx: 4;
+    ry: 4;
+    fill: linear-gradient(131deg, var(--main-color) 0%, var(--main-color2) 100%);
+}
+i{  
+    font-size: 1.5rem;
+    font-weight: 300;
+}
+body{
+    width: 100vw;
+    height: 100vh;
+    background: #cff7ff;
+    background: radial-gradient(circle, #b1b1ff 0%, #8a8aff 20%, #a0a0ff 35%, #b5b5ff 50%, #cad3ff 70%, #e0f0ff 85%, #cff7ff 100%);
+    overflow: hidden;
+}
+#timer{
+    color: var(--neutral-dark-bg);
+}
+#grid{
+    isolation: isolate;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    transition: all 0.25s ease-in-out;
+    border: 0.1rem solid #80808077;
+    border-radius: 0.5rem;
+    outline: 1rem black;
+}
+#watermark{
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.paused::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    background-color: rgba(128, 128, 128);
+    opacity: 0.2;
+}
+#watermark{
+    display: none;
+    font-family: 'Teko', sans-serif;
+    color: #FFFFFF;
+    opacity: 0.4;
+    z-index: -1;
+}
+#watermark h3{
+    letter-spacing: 0.2rem;
+    font-size: 4rem;
+}
+#watermark h4{
+    font-size: 15rem;
+    transform: scaleY(1.2);
+    
+}
+.blink{
+    animation: blink 1.5s 1;
+}
+.tetromino{
+    transition: all 0.2s ease-in;
+    border: 0.12rem solid black;
+    border-radius: 0.25rem;
+}
+
+@keyframes blink {
+    0% {
+        background-color: rgba(255, 255, 255, 0.553);
+        scale: 0.9;
+    }
+    100% {
+        background-color: transparent;
+        scale: 1;
+    }
+}
