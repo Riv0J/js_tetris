@@ -6,6 +6,9 @@ const CLASS_START_BUTTON= 'start_button';
 const CLASS_PAUSE_BUTTON= 'pause_button';
 const CLASS_RESUME_BUTTON= 'resume_button';
 
+const SCORE_PER_LINE = 10;
+const SCORE_PER_FREEZE = 1;
+
 let current_game_state = GAME_STATE_NONE;
 
 const main_button = document.getElementById('main_button');
@@ -103,6 +106,8 @@ let random_number = Math.floor(Math.random()*theTetrominoes.length)
 let current_tetromino = theTetrominoes[random_number][currentRotation]
 let current_color = tetris_colors[random_number];
 
+let line_checking = false;
+let downArrowPressed = false;
 let nextRandom = 0;
 let score = 0;
 let time_seconds = 0;
@@ -122,44 +127,67 @@ function undraw() {
         grid_squares[currentPosition + index].style.backgroundColor = ''
     })
 }
-function moveDown() {
-    if(current_game_state === GAME_STATE_PAUSED){
+async function moveDown() {
+    if(current_game_state != GAME_STATE_RUNNING || line_checking == true){
         return;
     }
     undraw()
     currentPosition += width
     draw()
-    freeze()
-}
 
-function freeze() {
-  let blocked = false;
-  current_tetromino.forEach(index =>{
-    if(!grid_squares[currentPosition + index + width]){
-      console.log('END');
-      blocked = true;
+    //can current tetromino move down next run???
+    const can_move_down = canMoveDown();
+    if(can_move_down == false){
+      if(time_this_tetromino == 0){
+        game_over();
+      } else{
+        time_this_tetromino = 0;
+        await new_tetromino();
+      }
+      //cant move down, check if lines have been completed
+      const lines_completed = await lines_checks();
+      let score_gained = SCORE_PER_LINE*lines_completed;
+      console.log('lines completed = '+lines_completed);
+      console.log('score gained = '+score_gained);
+
+      add_score(score_gained);
+    } else if(can_move_down == true){
+      time_this_tetromino +=1;
     }
-  });
-  if(blocked == false && current_tetromino.some(index => grid_squares[currentPosition + index + width].classList.contains('taken'))) {
-    blocked = true;
+    /*let timeOut = 1000;
+    if(downArrowPressed===true && time_this_tetromino >= 0){
+      timeOut=175;
+    }
+    setTimeout(() => {
+      moveDown();
+    }, timeOut);*/
+}
+function canMoveDown(){
+  //este bucle es un guardia de si el tetromino ha llegado al final
+  for (let index of current_tetromino) {
+    if (!grid_squares[currentPosition + index + width]) {
+      return false;
+    }
   }
-  if(blocked == true){
-    current_tetromino.forEach(index => grid_squares[currentPosition + index].classList.add('taken'))
-    //start a new tetromino falling
-    nextRandom = Math.floor(Math.random() * theTetrominoes.length)
+  //si alguno de la posicion futura del tetromino tiene la clase 'taken' entonces ya hay otro tetromino blockeando el paso
+  if(current_tetromino.some(index => grid_squares[currentPosition + index + width].classList.contains('taken'))){
+    return false;
+  }
 
-    random_number = nextRandom
-    current_tetromino = theTetrominoes[random_number][currentRotation]
-    current_color = tetris_colors[random_number]
-    currentPosition = 4
-    draw()
-    //displayShape()
-    
-    const lines_completed = lines_checks();
-    let score_gained = 10*lines_completed;
-    add_score(score_gained);
-    //gameOver()
-  }
+  return true;
+}
+async function new_tetromino(){
+  //set a new current tetromino
+  current_tetromino.forEach(index => grid_squares[currentPosition + index].classList.add('taken'))
+  //start a new tetromino falling
+  nextRandom = Math.floor(Math.random() * theTetrominoes.length)
+
+  random_number = nextRandom
+  current_tetromino = theTetrominoes[random_number][currentRotation]
+  current_color = tetris_colors[random_number]
+  currentPosition = 4
+  draw()
+  //displayShape()
 }
   //move the tetromino left, unless is at the edge or there is a blockage
   function moveLeft() {
@@ -209,8 +237,8 @@ function freeze() {
   function rotate() {
     undraw()
     currentRotation ++
-    console.log('rotate_attaempt current rotation = ',currentRotation)
-    if(currentRotation === current_tetromino.length) { //if the current rotation gets to 4, make it go back to 0
+    //if the current rotation gets to 4, make it go back to 0
+    if(currentRotation === current_tetromino.length) { 
       currentRotation = 0
     }
     current_tetromino = theTetrominoes[random_number][currentRotation]
@@ -224,6 +252,7 @@ function start_game(){
         timerId = null
     } else {
         draw()
+        //moveDown();
         timerId = setInterval(moveDown, 1000)
         nextRandom = Math.floor(Math.random()*theTetrominoes.length)
         //displayShape()
@@ -231,14 +260,17 @@ function start_game(){
 }
 function add_score(quantity){
   if(!quantity){
-    quantity = 1;
+    quantity = SCORE_PER_FREEZE;
+  } else{
+    quantity+=SCORE_PER_FREEZE;
   }
   score += quantity;
   score_container.textContent = score;
 }
 function action(action){
-    if(current_game_state === GAME_STATE_PAUSED){
-        return;
+    //si el game_state es diferente de running, no se hace nada
+    if(current_game_state != GAME_STATE_RUNNING){
+      return;
     }
     switch (action) {
         case 'moveLeft':
@@ -290,38 +322,78 @@ function resume_game(){
   change_game_state(GAME_STATE_RUNNING);
 }
 
-function lines_checks(){
+function game_over(){
+  main_button.classList.remove(CLASS_PAUSE_BUTTON);
+  main_button.classList.add(CLASS_RESUME_BUTTON);
+  main_button.textContent = 'Start Game';
+  grid.classList.add('paused');
+  //run
+  change_game_state(GAME_STATE_NONE);
+}
+
+async function lines_checks(){
+  line_checking = true;
   const total_squares_number = grid_squares.length;
   let lines_completed = 0;
+  let square_counter = 0;
   let squares_to_delete = [];
+  //un bucle que va de 10 en 10
   for (let i = 0; i < total_squares_number; i += 10) {
     const groupOfTen = grid_squares.slice(i, i + 10);
+    //all taken es true cuando todos los squares cumple condicion
     const allTaken = groupOfTen.every(square => square.classList.contains('taken'));
     if(allTaken == true){
       lines_completed+=1;
-      groupOfTen.forEach(sq => {
-        squares_to_delete.push(sq);
-      })
+      for (let index = 0; index < groupOfTen.length; index++) {
+        //guardar en el mapa, el sq html y su indice en el codigo
+        const square = groupOfTen[index];
+        square.style.border='0.35rem solid black';
+        squares_to_delete[square_counter] = square;
+        square_counter+=1;
+      }
     }
   }
-  /*let squares_to_replenish = squares_to_delete.length;
-    squares_to_delete.forEach(sq => {
-      sq.classList.add('blink');
-  });*/
-  
-  squares_to_delete.forEach(sq => {
-      grid.removeChild(sq);
-  });
+  let squares_to_replenish = squares_to_delete.length;
 
+  for (let index = 0; index < squares_to_delete.length; index++) {
+    const square = squares_to_delete[index];
+    grid.removeChild(square)
+  }
+
+  //restablecer grid_squares
   for (let index = 0; index < squares_to_replenish; index++) {
-    const square = document.createElement('div');
-    square.style.width = '10%';
-    square.style.aspectRatio = 1;
-    
+    const square = newSquare();
     grid.insertBefore(square,grid.firstChild);
-    grid_squares.push(square);
+    grid_squares.unshift(square);
     square.className = 'square';
   }
-  console.log(grid_squares.length);
+  refresh_grid_squares();
+  //console.log(grid_squares.length);
+  console.log(lines_completed+', TOTAL LINES JUST COMPLETED');
   return lines_completed;
 }
+
+function refresh_grid_squares(){
+  const node_list = grid.querySelectorAll('.square');
+  grid_squares = [];
+  node_list.forEach(element =>{
+    grid_squares.push(element);
+  });
+  console.log(grid_squares.length+', TOTAL SQUARES IN GRID_SQUARES');
+  line_checking = false;
+}
+
+
+// Add an event listener for keydown to detect when the down arrow key is pressed
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowDown') {
+    downArrowPressed = true;
+  }
+});
+
+// Add an event listener for keyup to detect when the down arrow key is released
+document.addEventListener('keyup', (event) => {
+  if (event.key === 'ArrowDown') {
+    downArrowPressed = false;
+  }
+});

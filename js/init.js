@@ -54,16 +54,20 @@ function getOptimalDimensions() {
 }
 function add_squares(quantity){
     for (let index = 0; index < quantity; index++) {
-        const square = document.createElement('div');
-        square.style.width = '10%';
-        square.style.aspectRatio = 1;
+        const square = newSquare();
 
         grid.appendChild(square);
         grid_squares.push(square);
-        square.className = 'square';
 
         /*setTimeout(function() {
             square.classList.add('blinking');
         }, 20*index);*/
     }
+}
+function newSquare(){
+    const square = document.createElement('div');
+    square.style.width = '10%';
+    square.style.aspectRatio = 1;
+    square.className = 'square';
+    return square;
 }
