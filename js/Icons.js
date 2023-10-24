@@ -83,6 +83,6 @@ function initDictionary(){
     };
 }
 document.addEventListener("DOMContentLoaded", function () {
-    console.log('Loaded Icons.js');
+    //console.log('Loaded Icons.js');
     populateIconClasses();
 });

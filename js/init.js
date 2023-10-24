@@ -1,48 +1,60 @@
 const nav = document.getElementsByTagName('nav')[0];
 const grid = document.getElementById('grid');
+const game_container = document.getElementById('game_container');
+const aside = document.getElementById('aside')
 let grid_squares = [];
 
 const GRID_WIDTH = 10;
-const GRID_HEIGHT = 10;
-const total_blocks = GRID_WIDTH*GRID_HEIGHT;
+const GRID_HEIGHT = 12;
+const TOTAL_SQUARES = GRID_WIDTH*GRID_HEIGHT;
 
-function init(){
+const ASIDE_CONTAINER_WIDTH = Math.floor(GRID_WIDTH / 3);
+
+const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH;
+
+async function init(){
     resizeGrid();
-    add_squares(total_blocks);
+    reset_squares();
 }
 document.addEventListener("DOMContentLoaded", function () {
     init();
-    console.log('Loaded init.js');
 });
 
 function resizeGrid(){
+    //set the dimensions of game_container, 
     const dimensions = getOptimalDimensions();
-    grid.style.width = dimensions['width']+'px';
-    grid.style.height = dimensions['height']+'px';
+    //game container
+    game_container.style.width = dimensions['width']+'px';
+    game_container.style.height = dimensions['height']+'px';
+
+    //grid
+    grid.style.width = GRID_WIDTH / TOTAL_GAME_WIDTH * 100 + '%';
+    grid.style.height = '100%';
+
+    //aside
+    aside.style.width = ASIDE_CONTAINER_WIDTH / TOTAL_GAME_WIDTH * 100 + '%' ;
+    aside.style.height = '100%';
     console.log(dimensions);
 }
 window.addEventListener('resize', resizeGrid);
 
 function getOptimalDimensions() {
-
-
     // Get the width and height of the user's browser window
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight - document.getElementById('header').clientHeight;
 
     // Determine the dimensions
     let dimensions;
-
     if(windowWidth < windowHeight){
         console.log('width smaller');
         dimensions = {
             width: windowWidth,
-            height: (windowWidth * GRID_HEIGHT) / GRID_WIDTH,
+            height: (windowWidth * GRID_HEIGHT) / TOTAL_GAME_WIDTH,
         };
     } else{
         console.log('height smaller');
         dimensions = {
-            width: (windowHeight * GRID_WIDTH) / GRID_HEIGHT,
+            width: (windowHeight * TOTAL_GAME_WIDTH) / GRID_HEIGHT,
             height: windowHeight,
         };
     }
@@ -52,16 +64,14 @@ function getOptimalDimensions() {
 
     return dimensions;
 }
-function add_squares(quantity){
-    for (let index = 0; index < quantity; index++) {
+function reset_squares() {
+    grid.innerHTML = '';
+    grid_squares = [];
+    
+    for (let index = 0; index < TOTAL_SQUARES; index++) {
         const square = newSquare();
-
         grid.appendChild(square);
         grid_squares.push(square);
-
-        /*setTimeout(function() {
-            square.classList.add('blinking');
-        }, 20*index);*/
     }
 }
 function newSquare(){
@@ -70,4 +80,21 @@ function newSquare(){
     square.style.aspectRatio = 1;
     square.className = 'square';
     return square;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+function grid_blink(){
+    grid_squares.forEach((square) => {
+        square.classList.add('blink');
+    });
+    remove_grid_blink();
+}
+function remove_grid_blink(){
+    setTimeout(() => {
+        grid_squares.forEach((square) => {
+            square.classList.remove('blink');
+        });
+    }, 2000)
 }

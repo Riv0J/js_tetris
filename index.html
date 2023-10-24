@@ -14,9 +14,8 @@
 </head>
 <body>
     <header id="header">   
-        <h1 id="timer">00:00</h1>
         <div id="main_button_container">
-            <button class="game_button start_button" id="main_button" onclick='menu_button(this)'>Start Game</button>
+            
         </div>
         <nav>
             <button type="nav">
@@ -72,22 +71,41 @@
         </nav>
     </header>
     <main>
-        <aside id="extras"></aside>
-        <div id="grid">
+        <div id="game_container">
             <div id='watermark'>
                 <h3>Tetris</h3>
-                <h3>SCORE</h3>
-                <h4 id='score'>0</h4>
             </div>
+            <aside class="watermark" id="extras">
+            </aside>
+            <div id="grid">
+            </div>
+            <aside id="aside">
+                <article id="top">
+                    <span>
+                        <h3>TIME</h3>
+                        <h1 id="timer"></h1>
+                    </span>
+                    <span>
+                        <h3>NEXT</h3>
+                        <div id="next_shape">
+                        </div>
+                    </span>
+                    <span>
+                        <button class="game_button start_button" id="main_button" onclick='menu_button(this)'>Start</button>
+                    </span>
+                </article>
+                <article id="bot">
+                    <span>
+                        <h3>SCORE</h3>
+                        <h4 id='score'></h4>
+                    </span>
+                </article>
+            </aside>
         </div>
-        <aside id="next_shape">
-        </aside>
     </main>
-    <footer>
-
-    </footer>
 </body>
 </html>
 <script src='js/init.js'></script>
 <script src='js/controller.js'></script>
 <script src='js/Icons.js'></script>
+<script src='js/game_controller.js'></script>

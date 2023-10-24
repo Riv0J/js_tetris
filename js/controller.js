@@ -1,10 +1,13 @@
+let TICK_MS = 800;
 const GAME_STATE_NONE = 0;
 const GAME_STATE_RUNNING = 1;
 const GAME_STATE_PAUSED = 2;
+const GAME_STATE_OVER = 3;
 
 const CLASS_START_BUTTON= 'start_button';
 const CLASS_PAUSE_BUTTON= 'pause_button';
 const CLASS_RESUME_BUTTON= 'resume_button';
+const CLASS_RESTART_BUTTON= 'restart_button';
 
 const SCORE_PER_LINE = 10;
 const SCORE_PER_FREEZE = 1;
@@ -14,16 +17,11 @@ let current_game_state = GAME_STATE_NONE;
 const main_button = document.getElementById('main_button');
 const watermark_container = document.getElementById('watermark');
 const score_container = document.getElementById('score');
+const timer_container = document.getElementById('timer');
 
-function menu_button(button){
+async function menu_button(button){
     switch (current_game_state) {
         case GAME_STATE_NONE:
-            main_button.classList.remove(CLASS_START_BUTTON);
-            main_button.classList.add(CLASS_PAUSE_BUTTON);
-            main_button.textContent = 'Pause';
-            watermark_container.style.display = 'flex';
-            //start
-            change_game_state(GAME_STATE_RUNNING);
             start_game();
             break;
         case GAME_STATE_RUNNING:
@@ -31,6 +29,10 @@ function menu_button(button){
             break;
         case GAME_STATE_PAUSED:
             resume_game();
+            break;
+        case GAME_STATE_OVER:
+            await reset_game();
+            start_game();
             break;
         default:
             break;
@@ -140,6 +142,7 @@ async function moveDown() {
     if(can_move_down == false){
       if(time_this_tetromino == 0){
         game_over();
+        return;
       } else{
         time_this_tetromino = 0;
         await new_tetromino();
@@ -153,14 +156,8 @@ async function moveDown() {
       add_score(score_gained);
     } else if(can_move_down == true){
       time_this_tetromino +=1;
+      update_timer();
     }
-    /*let timeOut = 1000;
-    if(downArrowPressed===true && time_this_tetromino >= 0){
-      timeOut=175;
-    }
-    setTimeout(() => {
-      moveDown();
-    }, timeOut);*/
 }
 function canMoveDown(){
   //este bucle es un guardia de si el tetromino ha llegado al final
@@ -233,83 +230,31 @@ async function new_tetromino(){
       }
     }
   }
-
-  function rotate() {
-    undraw()
-    currentRotation ++
-    //if the current rotation gets to 4, make it go back to 0
-    if(currentRotation === current_tetromino.length) { 
-      currentRotation = 0
-    }
-    current_tetromino = theTetrominoes[random_number][currentRotation]
-    checkRotatedPosition()
-    draw()
+function rotate() {
+  const can_rotate = canRotate();
+  if(can_rotate == false){
+    return;
   }
-  
-function start_game(){
-    if (timerId) {
-        clearInterval(timerId)
-        timerId = null
-    } else {
-        draw()
-        //moveDown();
-        timerId = setInterval(moveDown, 1000)
-        nextRandom = Math.floor(Math.random()*theTetrominoes.length)
-        //displayShape()
-    }
-}
-function add_score(quantity){
-  if(!quantity){
-    quantity = SCORE_PER_FREEZE;
-  } else{
-    quantity+=SCORE_PER_FREEZE;
+  undraw()
+  currentRotation ++
+  //if the current rotation gets to 4, make it go back to 0
+  if(currentRotation === current_tetromino.length) { 
+    currentRotation = 0
   }
-  score += quantity;
-  score_container.textContent = score;
+  current_tetromino = theTetrominoes[random_number][currentRotation]
+  //si esto se desactiva, pasan cosas raras de portaless
+  checkRotatedPosition()
+  draw()
 }
-function action(action){
-    //si el game_state es diferente de running, no se hace nada
-    if(current_game_state != GAME_STATE_RUNNING){
-      return;
-    }
-    switch (action) {
-        case 'moveLeft':
-            moveLeft();
-            break;
-        case 'moveRight':
-            moveRight();
-            break;
-        case 'moveDown':
-            moveDown();
-            break;
-        case 'rotate':
-            rotate();
-            break;
-        default:
-            break;
-    }
+function canRotate(){
+  return true;
 }
-//assign functions to keyCodes
-function control(e) {
-    if(e.keyCode === 37) {
-        action('moveLeft')
-    } else if (e.keyCode === 38) {
-        action('rotate')
-    } else if (e.keyCode === 39) {
-        action('moveRight')
-    } else if (e.keyCode === 40) {
-        action('moveDown')
-    }
-}
-document.addEventListener('keyup', control)
-
 
 function pause_game(){
   main_button.classList.remove(CLASS_PAUSE_BUTTON);
   main_button.classList.add(CLASS_RESUME_BUTTON);
   main_button.textContent = 'Resume';
-  grid.classList.add('paused');
-  //pause
+  gray_grid();
   change_game_state(GAME_STATE_PAUSED);
 }
 
@@ -317,20 +262,44 @@ function resume_game(){
   main_button.classList.remove(CLASS_RESUME_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
-  grid.classList.remove('paused');
-  //run
+  gray_grid();
   change_game_state(GAME_STATE_RUNNING);
 }
-
+function start_game(){
+  main_button.classList.remove(CLASS_START_BUTTON);
+  main_button.classList.add(CLASS_PAUSE_BUTTON);
+  main_button.textContent = 'Pause';
+  watermark_container.style.display = 'flex';
+  if (timerId) {
+      clearInterval(timerId)
+      timerId = null
+  } else {
+      draw()
+      //moveDown();
+      timerId = setInterval(moveDown, TICK_MS)
+      nextRandom = Math.floor(Math.random()*theTetrominoes.length)
+      //displayShape()
+  }
+  change_game_state(GAME_STATE_RUNNING);
+}
 function game_over(){
+  clearInterval(timerId)
+  timerId = null
   main_button.classList.remove(CLASS_PAUSE_BUTTON);
   main_button.classList.add(CLASS_RESUME_BUTTON);
-  main_button.textContent = 'Start Game';
-  grid.classList.add('paused');
+  main_button.textContent = 'Restart';
+  gray_grid();
   //run
-  change_game_state(GAME_STATE_NONE);
+  change_game_state(GAME_STATE_OVER);
+  console.log('GAME OVER!');
 }
-
+async function reset_game(){
+  reset_score();
+  gray_grid();
+  reset_squares();
+  grid_blink();
+  await sleep(1000);
+}
 async function lines_checks(){
   line_checking = true;
   const total_squares_number = grid_squares.length;
@@ -383,7 +352,6 @@ function refresh_grid_squares(){
   line_checking = false;
 }
 
-
 // Add an event listener for keydown to detect when the down arrow key is pressed
 document.addEventListener('keydown', (event) => {
   if (event.key === 'ArrowDown') {
@@ -397,3 +365,38 @@ document.addEventListener('keyup', (event) => {
     downArrowPressed = false;
   }
 });
+
+function gray_grid(){
+  const is_screen_gray = grid.classList.contains('grayed_out');
+  if(is_screen_gray == true){
+    grid.classList.remove('grayed_out');
+  } else{
+    grid.classList.add('grayed_out');
+  }
+}
+function add_score(quantity){
+  if(!quantity){
+    quantity = SCORE_PER_FREEZE;
+  } else{
+    quantity += SCORE_PER_FREEZE;
+  }
+  score += quantity;
+  update_score();
+}
+function reset_score(){
+  score = 0;
+  update_score();
+}
+function update_score(){
+  score_container.textContent = score;
+}
+function update_timer(){
+  time_seconds+=1;
+  const minutos = Math.floor(time_seconds / 60);
+  const segundos = time_seconds % 60;
+  let string = segundos;
+  if(minutos>0){
+    string = minutos+':'+segundos;
+  }
+  timer_container.textContent = string;
+}
