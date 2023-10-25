@@ -1,4 +1,11 @@
-let TICK_MS = 800;
+//variables DOM
+const main_button = document.getElementById('main_button');
+const watermark_container = document.getElementById('watermark');
+
+//variables js
+let TICK_MS = 250;
+let RESET_TIME_MS = 1000;
+
 const GAME_STATE_NONE = 0;
 const GAME_STATE_RUNNING = 1;
 const GAME_STATE_PAUSED = 2;
@@ -13,92 +20,37 @@ const SCORE_PER_LINE = 10;
 const SCORE_PER_FREEZE = 1;
 
 let current_game_state = GAME_STATE_NONE;
-
-const main_button = document.getElementById('main_button');
-const watermark_container = document.getElementById('watermark');
-const score_container = document.getElementById('score');
-const timer_container = document.getElementById('timer');
-
 async function menu_button(button){
-    switch (current_game_state) {
-        case GAME_STATE_NONE:
-            start_game();
-            break;
-        case GAME_STATE_RUNNING:
-            pause_game();
-            break;
-        case GAME_STATE_PAUSED:
-            resume_game();
-            break;
-        case GAME_STATE_OVER:
-            await reset_game();
-            start_game();
-            break;
-        default:
-            break;
-    }
+  switch (current_game_state) {
+      case GAME_STATE_NONE:
+          start_game();
+          break;
+      case GAME_STATE_RUNNING:
+          pause_game();
+          break;
+      case GAME_STATE_PAUSED:
+          resume_game();
+          break;
+      case GAME_STATE_OVER:
+          await reset_game();
+          start_game();
+          break;
+      default:
+          break;
+  }
 }
 function change_game_state(new_state){
-    switch (new_state) {
-        case GAME_STATE_RUNNING:
-            grid_squares.forEach(element => {
-                element.classList.remove('blinking');
-            })
-            break;
-    
-        default:
-            break;
-    }
-    current_game_state = new_state;
+  switch (new_state) {
+      case GAME_STATE_RUNNING:
+          grid_squares.forEach(element => {
+              element.classList.remove('blinking');
+          })
+          break;
+      default:
+          break;
+  }
+  current_game_state = new_state;
 }
-const tetris_colors = [
-  '#FF4136',
-  '#2ECC40',
-  '#0074D9',
-  '#FFDC00',
-  '#FF851B',
-  '#7FDBFF',
-  '#B10DC9',
-];
-const width= 10;
-
-//The Tetrominoes
-const lTetromino = [
-    [1, width+1, width*2+1, 2],
-    [width, width+1, width+2, width*2+2],
-    [1, width+1, width*2+1, width*2],
-    [width, width*2, width*2+1, width*2+2]
-]
-
-  const zTetromino = [
-    [0,width,width+1,width*2+1],
-    [width+1, width+2,width*2,width*2+1],
-    [0,width,width+1,width*2+1],
-    [width+1, width+2,width*2,width*2+1]
-  ]
-
-  const tTetromino = [
-    [1,width,width+1,width+2],
-    [1,width+1,width+2,width*2+1],
-    [width,width+1,width+2,width*2+1],
-    [1,width,width+1,width*2+1]
-  ]
-
-  const oTetromino = [
-    [0,1,width,width+1],
-    [0,1,width,width+1],
-    [0,1,width,width+1],
-    [0,1,width,width+1]
-  ]
-
-  const iTetromino = [
-    [1,width+1,width*2+1,width*3+1],
-    [width,width+1,width+2,width+3],
-    [1,width+1,width*2+1,width*3+1],
-    [width,width+1,width+2,width+3]
-  ]
-
-const theTetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino]
 
 let currentPosition = 4
 let currentRotation = 0
@@ -111,8 +63,6 @@ let current_color = tetris_colors[random_number];
 let line_checking = false;
 let downArrowPressed = false;
 let nextRandom = 0;
-let score = 0;
-let time_seconds = 0;
 let time_this_tetromino = 0;
 let timerId; 
 
@@ -130,7 +80,7 @@ function undraw() {
     })
 }
 async function moveDown() {
-    if(current_game_state != GAME_STATE_RUNNING || line_checking == true){
+    if(current_game_state != GAME_STATE_RUNNING){
         return;
     }
     undraw()
@@ -148,17 +98,20 @@ async function moveDown() {
         await new_tetromino();
       }
       //cant move down, check if lines have been completed
-      const lines_completed = await lines_checks();
+      const lines_completed = await checkLines();
       let score_gained = SCORE_PER_LINE*lines_completed;
-      console.log('lines completed = '+lines_completed);
-      console.log('score gained = '+score_gained);
+      if(score_gained == 0){
+        score_gained = SCORE_PER_FREEZE;
+      }
+      /*console.log('lines completed = '+lines_completed);
+      console.log('score gained = '+score_gained);*/
 
-      add_score(score_gained);
+      addScore(score_gained);
     } else if(can_move_down == true){
       time_this_tetromino +=1;
-      update_timer();
     }
 }
+
 function canMoveDown(){
   //este bucle es un guardia de si el tetromino ha llegado al final
   for (let index of current_tetromino) {
@@ -170,7 +123,6 @@ function canMoveDown(){
   if(current_tetromino.some(index => grid_squares[currentPosition + index + width].classList.contains('taken'))){
     return false;
   }
-
   return true;
 }
 async function new_tetromino(){
@@ -211,7 +163,6 @@ async function new_tetromino(){
   function isAtRight() {
     return current_tetromino.some(index=> (currentPosition + index + 1) % width === 0)  
   }
-  
   function isAtLeft() {
     return current_tetromino.some(index=> (currentPosition + index) % width === 0)
   }
@@ -249,20 +200,20 @@ function rotate() {
 function canRotate(){
   return true;
 }
-
 function pause_game(){
   main_button.classList.remove(CLASS_PAUSE_BUTTON);
   main_button.classList.add(CLASS_RESUME_BUTTON);
   main_button.textContent = 'Resume';
   gray_grid();
+  pauseTimer();
   change_game_state(GAME_STATE_PAUSED);
 }
-
 function resume_game(){
   main_button.classList.remove(CLASS_RESUME_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
   gray_grid();
+  resumeTimer();
   change_game_state(GAME_STATE_RUNNING);
 }
 function start_game(){
@@ -280,7 +231,16 @@ function start_game(){
       nextRandom = Math.floor(Math.random()*theTetrominoes.length)
       //displayShape()
   }
+  startTimer();
   change_game_state(GAME_STATE_RUNNING);
+}
+async function reset_game(){
+  gray_grid();
+  resetTimer();
+  resetScore();
+  reset_squares();
+  grid_blink();
+  await sleep(RESET_TIME_MS);
 }
 function game_over(){
   clearInterval(timerId)
@@ -290,58 +250,10 @@ function game_over(){
   main_button.textContent = 'Restart';
   gray_grid();
   //run
+  stopTimer();
   change_game_state(GAME_STATE_OVER);
   console.log('GAME OVER!');
 }
-async function reset_game(){
-  reset_score();
-  gray_grid();
-  reset_squares();
-  grid_blink();
-  await sleep(1000);
-}
-async function lines_checks(){
-  line_checking = true;
-  const total_squares_number = grid_squares.length;
-  let lines_completed = 0;
-  let square_counter = 0;
-  let squares_to_delete = [];
-  //un bucle que va de 10 en 10
-  for (let i = 0; i < total_squares_number; i += 10) {
-    const groupOfTen = grid_squares.slice(i, i + 10);
-    //all taken es true cuando todos los squares cumple condicion
-    const allTaken = groupOfTen.every(square => square.classList.contains('taken'));
-    if(allTaken == true){
-      lines_completed+=1;
-      for (let index = 0; index < groupOfTen.length; index++) {
-        //guardar en el mapa, el sq html y su indice en el codigo
-        const square = groupOfTen[index];
-        square.style.border='0.35rem solid black';
-        squares_to_delete[square_counter] = square;
-        square_counter+=1;
-      }
-    }
-  }
-  let squares_to_replenish = squares_to_delete.length;
-
-  for (let index = 0; index < squares_to_delete.length; index++) {
-    const square = squares_to_delete[index];
-    grid.removeChild(square)
-  }
-
-  //restablecer grid_squares
-  for (let index = 0; index < squares_to_replenish; index++) {
-    const square = newSquare();
-    grid.insertBefore(square,grid.firstChild);
-    grid_squares.unshift(square);
-    square.className = 'square';
-  }
-  refresh_grid_squares();
-  //console.log(grid_squares.length);
-  console.log(lines_completed+', TOTAL LINES JUST COMPLETED');
-  return lines_completed;
-}
-
 function refresh_grid_squares(){
   const node_list = grid.querySelectorAll('.square');
   grid_squares = [];
@@ -349,23 +261,7 @@ function refresh_grid_squares(){
     grid_squares.push(element);
   });
   console.log(grid_squares.length+', TOTAL SQUARES IN GRID_SQUARES');
-  line_checking = false;
 }
-
-// Add an event listener for keydown to detect when the down arrow key is pressed
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'ArrowDown') {
-    downArrowPressed = true;
-  }
-});
-
-// Add an event listener for keyup to detect when the down arrow key is released
-document.addEventListener('keyup', (event) => {
-  if (event.key === 'ArrowDown') {
-    downArrowPressed = false;
-  }
-});
-
 function gray_grid(){
   const is_screen_gray = grid.classList.contains('grayed_out');
   if(is_screen_gray == true){
@@ -373,30 +269,4 @@ function gray_grid(){
   } else{
     grid.classList.add('grayed_out');
   }
-}
-function add_score(quantity){
-  if(!quantity){
-    quantity = SCORE_PER_FREEZE;
-  } else{
-    quantity += SCORE_PER_FREEZE;
-  }
-  score += quantity;
-  update_score();
-}
-function reset_score(){
-  score = 0;
-  update_score();
-}
-function update_score(){
-  score_container.textContent = score;
-}
-function update_timer(){
-  time_seconds+=1;
-  const minutos = Math.floor(time_seconds / 60);
-  const segundos = time_seconds % 60;
-  let string = segundos;
-  if(minutos>0){
-    string = minutos+':'+segundos;
-  }
-  timer_container.textContent = string;
 }

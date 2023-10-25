@@ -69,6 +69,8 @@ h4{
     font-weight: 500;
     letter-spacing: 0.1rem;
     transform: scaleY(1.2);
+
+    color: var(--neutral-dark-bg);
 }
 main{
     display: flex;
@@ -152,9 +154,6 @@ body{
     background: #cff7ff;
     background: radial-gradient(circle, #b1b1ff 0%, #8a8aff 20%, #a0a0ff 35%, #b5b5ff 50%, #cad3ff 70%, #e0f0ff 85%, #cff7ff 100%);
     overflow: hidden;
-}
-#timer{
-    color: var(--neutral-dark-bg);
 }
 #game_container{
     display: flex;
@@ -245,7 +244,6 @@ body{
     animation: blink 1.5s 1;
 }
 .tetromino{
-    transition: all 0.2s ease-in;
     border: 0.12rem solid black;
     border-radius: 0.25rem;
 }

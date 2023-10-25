@@ -10,12 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/style.css">
-    <title>Wide Tetris</title>
+    <title>Tetris</title>
 </head>
 <body>
     <header id="header">   
         <div id="main_button_container">
-            
         </div>
         <nav>
             <button type="nav">
@@ -83,7 +82,11 @@
                 <article id="top">
                     <span>
                         <h3>TIME</h3>
-                        <h1 id="timer"></h1>
+                        <h4 id="timer">0</h1>
+                    </span>
+                    <span>
+                        <h3>LINES</h3>
+                        <h4 id='lines'>0</h4>
                     </span>
                     <span>
                         <h3>NEXT</h3>
@@ -97,7 +100,7 @@
                 <article id="bot">
                     <span>
                         <h3>SCORE</h3>
-                        <h4 id='score'></h4>
+                        <h4 id='score'>0</h4>
                     </span>
                 </article>
             </aside>
@@ -106,6 +109,11 @@
 </body>
 </html>
 <script src='js/init.js'></script>
-<script src='js/controller.js'></script>
+<script src='js/tetrominos.js'></script>
+<script src='js/tetris_colors.js'></script>
+<script src='js/timer.js'></script>
+<script src='js/score.js'></script>
+<script src='js/lines.js'></script>
+<script src='js/core.js'></script>
 <script src='js/Icons.js'></script>
 <script src='js/game_controller.js'></script>

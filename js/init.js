@@ -1,15 +1,14 @@
-const nav = document.getElementsByTagName('nav')[0];
 const grid = document.getElementById('grid');
 const game_container = document.getElementById('game_container');
 const aside = document.getElementById('aside')
 let grid_squares = [];
 
 const GRID_WIDTH = 10;
-const GRID_HEIGHT = 12;
-const TOTAL_SQUARES = GRID_WIDTH*GRID_HEIGHT;
+const GRID_HEIGHT = 16;
 
 const ASIDE_CONTAINER_WIDTH = Math.floor(GRID_WIDTH / 3);
 
+const TOTAL_SQUARES = GRID_WIDTH*GRID_HEIGHT;
 const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH;
 
 async function init(){
@@ -61,7 +60,6 @@ function getOptimalDimensions() {
     // Reduce the dimensions to the nearest multiple of 10
     dimensions.width = Math.floor(dimensions.width / 10) * 10;
     dimensions.height = Math.floor(dimensions.height / 10) * 10;
-
     return dimensions;
 }
 function reset_squares() {
@@ -81,7 +79,6 @@ function newSquare(){
     square.className = 'square';
     return square;
 }
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
