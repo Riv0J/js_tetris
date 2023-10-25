@@ -30,7 +30,7 @@ function control(e) {
     } else if (e.keyCode === 39) {
         action('moveRight')
     } else if (e.keyCode === 40) {
-        action('moveDown')
+        //action('moveDown')
     }
 }
 document.addEventListener('keyup', control)
@@ -38,13 +38,13 @@ document.addEventListener('keyup', control)
 // Add an event listener for keydown to detect when the down arrow key is pressed
 document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') {
-      downArrowPressed = true;
+      TICK_MS = TICK_MS_QUICK;
     }
   });
   
   // Add an event listener for keyup to detect when the down arrow key is released
   document.addEventListener('keyup', (event) => {
     if (event.key === 'ArrowDown') {
-      downArrowPressed = false;
+        TICK_MS = TICK_MS_NORMAL;
     }
   });

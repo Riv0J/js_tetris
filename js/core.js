@@ -3,8 +3,12 @@ const main_button = document.getElementById('main_button');
 const watermark_container = document.getElementById('watermark');
 
 //variables js
-let TICK_MS = 250;
-let RESET_TIME_MS = 1000;
+const TICK_MS_NORMAL = 600;
+let TICK_MS = TICK_MS_NORMAL;
+let TICK_MS_QUICK = 75;
+
+let FREEZE_TIME_MS = TICK_MS_NORMAL;
+let RESET_TIME_MS = 750;
 
 const GAME_STATE_NONE = 0;
 const GAME_STATE_RUNNING = 1;
@@ -23,7 +27,7 @@ let current_game_state = GAME_STATE_NONE;
 async function menu_button(button){
   switch (current_game_state) {
       case GAME_STATE_NONE:
-          start_game();
+          await start_game();
           break;
       case GAME_STATE_RUNNING:
           pause_game();
@@ -33,7 +37,7 @@ async function menu_button(button){
           break;
       case GAME_STATE_OVER:
           await reset_game();
-          start_game();
+          await start_game();
           break;
       default:
           break;
@@ -107,9 +111,13 @@ async function moveDown() {
       console.log('score gained = '+score_gained);*/
 
       addScore(score_gained);
+      await sleep(FREEZE_TIME_MS);
     } else if(can_move_down == true){
       time_this_tetromino +=1;
+      await sleep(TICK_MS);
+      console.log(TICK_MS);
     }
+    await moveDown();
 }
 
 function canMoveDown(){
@@ -148,7 +156,6 @@ async function new_tetromino(){
     }
     draw()
   }
-
   //move the tetromino right, unless is at the edge or there is a blockage
   function moveRight() {
     undraw()
@@ -216,23 +223,24 @@ function resume_game(){
   resumeTimer();
   change_game_state(GAME_STATE_RUNNING);
 }
-function start_game(){
+async function start_game(){
   main_button.classList.remove(CLASS_START_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
   watermark_container.style.display = 'flex';
-  if (timerId) {
+  change_game_state(GAME_STATE_RUNNING);
+
+  startTimer();
+  await moveDown();
+  /*if (timerId) {
       clearInterval(timerId)
       timerId = null
   } else {
       draw()
-      //moveDown();
       timerId = setInterval(moveDown, TICK_MS)
       nextRandom = Math.floor(Math.random()*theTetrominoes.length)
       //displayShape()
-  }
-  startTimer();
-  change_game_state(GAME_STATE_RUNNING);
+  }*/
 }
 async function reset_game(){
   gray_grid();
