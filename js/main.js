@@ -3,9 +3,10 @@ const main_button = document.getElementById('main_button');
 const watermark_container = document.getElementById('watermark');
 
 //variables js
-const TICK_MS_NORMAL = 600;
+const TICK_MS_NORMAL = 700;
+const TICK_MS_SIDES = null;
 let TICK_MS = TICK_MS_NORMAL;
-let TICK_MS_QUICK = 75;
+let TICK_MS_QUICK = 50;
 
 let FREEZE_TIME_MS = TICK_MS_NORMAL;
 let RESET_TIME_MS = 750;
@@ -33,7 +34,7 @@ async function menu_button(button){
           pause_game();
           break;
       case GAME_STATE_PAUSED:
-          resume_game();
+          await resume_game();
           break;
       case GAME_STATE_OVER:
           await reset_game();
@@ -46,9 +47,6 @@ async function menu_button(button){
 function change_game_state(new_state){
   switch (new_state) {
       case GAME_STATE_RUNNING:
-          grid_squares.forEach(element => {
-              element.classList.remove('blinking');
-          })
           break;
       default:
           break;
@@ -64,11 +62,15 @@ let random_number = Math.floor(Math.random()*theTetrominoes.length)
 let current_tetromino = theTetrominoes[random_number][currentRotation]
 let current_color = tetris_colors[random_number];
 
-let line_checking = false;
-let downArrowPressed = false;
 let nextRandom = 0;
 let time_this_tetromino = 0;
 let timerId; 
+
+//variables de presionar botones
+let moving_sides_loop = false;
+let moving_sides = false;
+let moving_left = false;
+let moving_right = false;
 
 //core functions 
 function draw() {
@@ -103,23 +105,17 @@ async function moveDown() {
       }
       //cant move down, check if lines have been completed
       const lines_completed = await checkLines();
-      let score_gained = SCORE_PER_LINE*lines_completed;
-      if(score_gained == 0){
-        score_gained = SCORE_PER_FREEZE;
-      }
+      let score_gained = calculateScore(lines_completed);
       /*console.log('lines completed = '+lines_completed);
       console.log('score gained = '+score_gained);*/
-
       addScore(score_gained);
       await sleep(FREEZE_TIME_MS);
     } else if(can_move_down == true){
       time_this_tetromino +=1;
-      await sleep(TICK_MS);
-      console.log(TICK_MS);
+      await moveDownSleep();
     }
     await moveDown();
 }
-
 function canMoveDown(){
   //este bucle es un guardia de si el tetromino ha llegado al final
   for (let index of current_tetromino) {
@@ -165,6 +161,24 @@ async function new_tetromino(){
       currentPosition -=1
     }
     draw()
+  }
+  async function moveSidesHold(){
+    console.log('move side hold')
+    if(moving_sides_loop === true){
+      console.log('cannot create duplicate of holding sides')
+      return;
+    }
+    moving_sides_loop = true;
+    while(moving_right === true || moving_left === true){
+      console.log('loopin')
+      if(moving_right == true){
+        moveRight();
+      } else if(moving_left == true){
+        moveLeft();
+      }
+      await moveSidesSleep();
+    }
+    moving_sides_loop = false;
   }
   ///FIX ROTATION OF TETROMINOS A THE EDGE 
   function isAtRight() {
@@ -215,13 +229,14 @@ function pause_game(){
   pauseTimer();
   change_game_state(GAME_STATE_PAUSED);
 }
-function resume_game(){
+async function resume_game(){
   main_button.classList.remove(CLASS_RESUME_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
   gray_grid();
   resumeTimer();
   change_game_state(GAME_STATE_RUNNING);
+  await moveDown();
 }
 async function start_game(){
   main_button.classList.remove(CLASS_START_BUTTON);
@@ -232,21 +247,13 @@ async function start_game(){
 
   startTimer();
   await moveDown();
-  /*if (timerId) {
-      clearInterval(timerId)
-      timerId = null
-  } else {
-      draw()
-      timerId = setInterval(moveDown, TICK_MS)
-      nextRandom = Math.floor(Math.random()*theTetrominoes.length)
-      //displayShape()
-  }*/
 }
 async function reset_game(){
   gray_grid();
   resetTimer();
+  resetLines();
   resetScore();
-  reset_squares();
+  resetSquares();
   grid_blink();
   await sleep(RESET_TIME_MS);
 }
@@ -276,5 +283,24 @@ function gray_grid(){
     grid.classList.remove('grayed_out');
   } else{
     grid.classList.add('grayed_out');
+  }
+}
+//smart sleeps
+async function moveDownSleep(){
+  const loops = 8;
+  for(i = 0; i < loops; i++){
+    await sleep(TICK_MS_NORMAL/loops);
+    if(TICK_MS != TICK_MS_NORMAL){
+      break;
+    }
+  }
+}
+async function moveSidesSleep(){
+  const loops = 6;
+  for(i = 0; i < loops; i++){
+    await sleep(TICK_MS_QUICK*4/loops);
+    if(moving_left === false && moving_right === false){
+      break;
+    }
   }
 }

@@ -3,9 +3,7 @@ const lines_container = document.getElementById('lines');
 
 //variables js
 let total_lines = 0;
-
 async function checkLines(){
-    line_checking = true;
     const total_squares_number = grid_squares.length;
     let lines_completed = 0;
     let square_counter = 0;
@@ -49,5 +47,13 @@ async function checkLines(){
   }
 
   function updateLines(){
-    lines_container.textContent = total_lines;
+    let lines_string = total_lines+'';
+    while(lines_string.length<3){
+      lines_string = '0'+lines_string;
+    }
+    lines_container.textContent = lines_string;
+  }
+  function resetLines(){
+    total_lines = 0;
+    updateLines();
   }

@@ -6,14 +6,14 @@ let grid_squares = [];
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 16;
 
-const ASIDE_CONTAINER_WIDTH = Math.floor(GRID_WIDTH / 3);
+const ASIDE_CONTAINER_WIDTH = Math.floor(GRID_WIDTH / 2);
 
 const TOTAL_SQUARES = GRID_WIDTH*GRID_HEIGHT;
 const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH;
 
 async function init(){
     resizeGrid();
-    reset_squares();
+    resetSquares();
 }
 document.addEventListener("DOMContentLoaded", function () {
     init();
@@ -62,10 +62,13 @@ function getOptimalDimensions() {
     dimensions.height = Math.floor(dimensions.height / 10) * 10;
     return dimensions;
 }
-function reset_squares() {
-    grid.innerHTML = '';
+function resetSquares() {
+    const get_squares = grid.querySelectorAll('.square');
+    get_squares.forEach((square) => {
+        grid.removeChild(square);
+    });
+
     grid_squares = [];
-    
     for (let index = 0; index < TOTAL_SQUARES; index++) {
         const square = newSquare();
         grid.appendChild(square);
