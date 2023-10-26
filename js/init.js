@@ -3,13 +3,14 @@ const game_container = document.getElementById('game_container');
 const aside = document.getElementById('aside')
 let grid_squares = [];
 
+const VERTICAL_PADDING = 0.2;
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 16;
 
 const ASIDE_CONTAINER_WIDTH = Math.floor(GRID_WIDTH / 2);
 
 const TOTAL_SQUARES = GRID_WIDTH*GRID_HEIGHT;
-const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH;
+const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH /*+ (VERTICAL_PADDING*2);*/
 
 async function init(){
     resizeGrid();
@@ -33,6 +34,9 @@ function resizeGrid(){
     //aside
     aside.style.width = ASIDE_CONTAINER_WIDTH / TOTAL_GAME_WIDTH * 100 + '%' ;
     aside.style.height = '100%';
+
+    //apply margins to game_container
+    //game_container.style.marginBlock = (VERTICAL_PADDING/2) / TOTAL_GAME_WIDTH * 100+ '%';
     console.log(dimensions);
 }
 window.addEventListener('resize', resizeGrid);
@@ -40,7 +44,7 @@ window.addEventListener('resize', resizeGrid);
 function getOptimalDimensions() {
     // Get the width and height of the user's browser window
     const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight - document.getElementById('header').clientHeight;
+    const windowHeight = window.innerHeight;
 
     // Determine the dimensions
     let dimensions;
@@ -80,21 +84,36 @@ function newSquare(){
     square.style.width = '10%';
     square.style.aspectRatio = 1;
     square.className = 'square';
+    /*square.classList.add('shine');*/
     return square;
 }
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-function grid_blink(){
-    grid_squares.forEach((square) => {
-        square.classList.add('blink');
+async function grid_blink(){
+    await class_effect(grid_squares, 'blink', 1500);
+}
+async function line_completed_effect(line_squares){
+    await class_effect(line_squares, 'shine', 1000);
+}
+async function class_effect(elements_array, class_name, wait_ms=0){
+    elements_array.forEach((element) => {
+        element.classList.add(class_name);
+        switch (class_name) {
+            case 'shine':
+                element.style.border = '0.16rem solid black';
+                break;
+        
+            default:
+                break;
+        }
     });
-    remove_grid_blink();
+    await remove_class_effect(elements_array, class_name, wait_ms);
 }
-function remove_grid_blink(){
-    setTimeout(() => {
-        grid_squares.forEach((square) => {
-            square.classList.remove('blink');
-        });
-    }, 2000)
+async function remove_class_effect(elements_array, class_name, wait_ms){
+    await sleep(wait_ms);
+    elements_array.forEach((element) => {
+        element.classList.remove(class_name);
+    });
 }
+

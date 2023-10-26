@@ -63,7 +63,7 @@ let current_tetromino = theTetrominoes[random_number][currentRotation]
 let current_color = tetris_colors[random_number];
 
 let nextRandom = 0;
-let time_this_tetromino = 0;
+let steps_this_tetromino = 0;
 let timerId; 
 
 //variables de presionar botones
@@ -71,6 +71,7 @@ let moving_sides_loop = false;
 let moving_sides = false;
 let moving_left = false;
 let moving_right = false;
+let checking_lines = false;
 
 //core functions 
 function draw() {
@@ -86,7 +87,7 @@ function undraw() {
     })
 }
 async function moveDown() {
-    if(current_game_state != GAME_STATE_RUNNING){
+    if(current_game_state != GAME_STATE_RUNNING || checking_lines === true){
         return;
     }
     undraw()
@@ -96,22 +97,25 @@ async function moveDown() {
     //can current tetromino move down next run???
     const can_move_down = canMoveDown();
     if(can_move_down == false){
-      if(time_this_tetromino == 0){
+      if(steps_this_tetromino == 0){
         game_over();
         return;
       } else{
-        time_this_tetromino = 0;
-        await new_tetromino();
+        steps_this_tetromino = 0;
+        freezeTetromino();
+        await newTetromino();
       }
       //cant move down, check if lines have been completed
+      checking_lines = true;
       const lines_completed = await checkLines();
+      checking_lines = false;
       let score_gained = calculateScore(lines_completed);
       /*console.log('lines completed = '+lines_completed);
       console.log('score gained = '+score_gained);*/
       addScore(score_gained);
       await sleep(FREEZE_TIME_MS);
     } else if(can_move_down == true){
-      time_this_tetromino +=1;
+      steps_this_tetromino +=1;
       await moveDownSleep();
     }
     await moveDown();
@@ -129,9 +133,12 @@ function canMoveDown(){
   }
   return true;
 }
-async function new_tetromino(){
+function freezeTetromino(){
+  current_tetromino.forEach(index => grid_squares[currentPosition + index].classList.add('taken'));
+}
+async function newTetromino(){
   //set a new current tetromino
-  current_tetromino.forEach(index => grid_squares[currentPosition + index].classList.add('taken'))
+  
   //start a new tetromino falling
   nextRandom = Math.floor(Math.random() * theTetrominoes.length)
 
@@ -303,4 +310,7 @@ async function moveSidesSleep(){
       break;
     }
   }
+}
+async function drawProjection(){
+
 }

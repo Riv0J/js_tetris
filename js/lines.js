@@ -18,19 +18,18 @@ async function checkLines(){
         for (let index = 0; index < groupOfTen.length; index++) {
           //guardar en el mapa, el sq html y su indice en el codigo
           const square = groupOfTen[index];
-          square.style.border='0.35rem solid black';
           squares_to_delete[square_counter] = square;
           square_counter+=1;
         }
       }
     }
-    let squares_to_replenish = squares_to_delete.length;
-  
-    for (let index = 0; index < squares_to_delete.length; index++) {
-      const square = squares_to_delete[index];
-      grid.removeChild(square)
+    if(lines_completed === 0){
+      return lines_completed;
     }
-  
+    let squares_to_replenish = squares_to_delete.length;
+    await line_completed_effect(squares_to_delete);
+    destroyLines(squares_to_delete);
+
     //restablecer grid_squares
     for (let index = 0; index < squares_to_replenish; index++) {
       const square = newSquare();
@@ -56,4 +55,11 @@ async function checkLines(){
   function resetLines(){
     total_lines = 0;
     updateLines();
+  }
+
+  function destroyLines(squares_array){
+    for (let index = 0; index < squares_array.length; index++) {
+      const square = squares_array[index];
+      grid.removeChild(square)
+    }
   }
