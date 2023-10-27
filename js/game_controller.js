@@ -41,7 +41,7 @@ document.addEventListener('keyup', control)
 document.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowDown':
-            TICK_MS = TICK_MS_QUICK;
+            hold_move_down = true;
             break;
         case 'ArrowRight':
             moving_left = false;
@@ -61,7 +61,7 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keyup', (event) => {
     switch (event.key) {
         case 'ArrowDown':
-            TICK_MS = TICK_MS_NORMAL;
+            hold_move_down = false;
             break;
         case 'ArrowRight':
             moving_right = false;

@@ -2,24 +2,22 @@
 const main_button = document.getElementById('main_button');
 const watermark_container = document.getElementById('watermark');
 
-//variables js
-const TICK_MS_NORMAL = 700;
-const TICK_MS_SIDES = null;
-let TICK_MS = TICK_MS_NORMAL;
-let TICK_MS_QUICK = 50;
+const CLASS_START_BUTTON= 'start_button';
+const CLASS_PAUSE_BUTTON= 'pause_button';
+const CLASS_RESUME_BUTTON= 'resume_button';
+const CLASS_RESTART_BUTTON= 'restart_button';
 
-let FREEZE_TIME_MS = TICK_MS_NORMAL;
-let RESET_TIME_MS = 750;
+//variables js
+const TICK_MS = 700;
+const TICK_MS_MOVE_SIDES = 150;
+
+let FREEZE_TIME_MS = TICK_MS/2;
+let GAME_RESET_TIME_MS = 1000;
 
 const GAME_STATE_NONE = 0;
 const GAME_STATE_RUNNING = 1;
 const GAME_STATE_PAUSED = 2;
 const GAME_STATE_OVER = 3;
-
-const CLASS_START_BUTTON= 'start_button';
-const CLASS_PAUSE_BUTTON= 'pause_button';
-const CLASS_RESUME_BUTTON= 'resume_button';
-const CLASS_RESTART_BUTTON= 'restart_button';
 
 const SCORE_PER_LINE = 10;
 const SCORE_PER_FREEZE = 1;
@@ -67,11 +65,13 @@ let steps_this_tetromino = 0;
 let timerId; 
 
 //variables de presionar botones
+let hold_move_down = false;
 let moving_sides_loop = false;
-let moving_sides = false;
 let moving_left = false;
 let moving_right = false;
 let checking_lines = false;
+
+let can_move_sides = true;
 
 //core functions 
 function draw() {
@@ -96,16 +96,10 @@ async function moveDown() {
 
     //can current tetromino move down next run???
     const can_move_down = canMoveDown();
-    if(can_move_down == false){
-      if(steps_this_tetromino == 0){
-        game_over();
-        return;
-      } else{
-        steps_this_tetromino = 0;
-        freezeTetromino();
-        await newTetromino();
-      }
+    if(can_move_down === false){
+      freezeTetromino();
       //cant move down, check if lines have been completed
+      const square_elements_current_tetromino = await getCurrentTetrominoSquares();
       checking_lines = true;
       const lines_completed = await checkLines();
       checking_lines = false;
@@ -113,7 +107,14 @@ async function moveDown() {
       /*console.log('lines completed = '+lines_completed);
       console.log('score gained = '+score_gained);*/
       addScore(score_gained);
-      await sleep(FREEZE_TIME_MS);
+      if(steps_this_tetromino == 0){
+        game_over();
+        return;
+      } else{
+        await sleep(FREEZE_TIME_MS);
+        steps_this_tetromino = 0;
+        await newTetromino();
+      }
     } else if(can_move_down == true){
       steps_this_tetromino +=1;
       await moveDownSleep();
@@ -146,11 +147,15 @@ async function newTetromino(){
   current_tetromino = theTetrominoes[random_number][currentRotation]
   current_color = tetris_colors[random_number]
   currentPosition = 4
+  can_move_sides = true;
   draw()
   //displayShape()
 }
   //move the tetromino left, unless is at the edge or there is a blockage
   function moveLeft() {
+    if(can_move_sides === false){
+      return;
+    }
     undraw()
     const isAtLeftEdge = current_tetromino.some(index => (currentPosition + index) % width === 0)
     if(!isAtLeftEdge) currentPosition -=1
@@ -161,6 +166,9 @@ async function newTetromino(){
   }
   //move the tetromino right, unless is at the edge or there is a blockage
   function moveRight() {
+    if(can_move_sides === false){
+      return;
+    }
     undraw()
     const isAtRightEdge = current_tetromino.some(index => (currentPosition + index) % width === width -1)
     if(!isAtRightEdge) currentPosition +=1
@@ -260,9 +268,9 @@ async function reset_game(){
   resetTimer();
   resetLines();
   resetScore();
-  resetSquares();
+  await resetSquares();
   grid_blink();
-  await sleep(RESET_TIME_MS);
+  await sleep(GAME_RESET_TIME_MS);
 }
 function game_over(){
   clearInterval(timerId)
@@ -294,10 +302,10 @@ function gray_grid(){
 }
 //smart sleeps
 async function moveDownSleep(){
-  const loops = 8;
+  const loops = 32;
   for(i = 0; i < loops; i++){
-    await sleep(TICK_MS_NORMAL/loops);
-    if(TICK_MS != TICK_MS_NORMAL){
+    await sleep(TICK_MS/loops);
+    if(hold_move_down === true){
       break;
     }
   }
@@ -305,7 +313,7 @@ async function moveDownSleep(){
 async function moveSidesSleep(){
   const loops = 6;
   for(i = 0; i < loops; i++){
-    await sleep(TICK_MS_QUICK*4/loops);
+    await sleep(TICK_MS_MOVE_SIDES/loops);
     if(moving_left === false && moving_right === false){
       break;
     }
@@ -313,4 +321,13 @@ async function moveSidesSleep(){
 }
 async function drawProjection(){
 
+}
+
+async function getCurrentTetrominoSquares(){
+  const squares = [];
+  current_tetromino.forEach(index => {
+    const square = grid_squares[currentPosition + index];
+    squares.push(square);
+  });
+  return squares;
 }

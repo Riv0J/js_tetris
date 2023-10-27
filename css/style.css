@@ -143,6 +143,9 @@ body{
     border-radius: 0.5rem;
     outline: 1rem black;
 }
+#grid > .square{
+    z-index: 1000;
+}
 #aside{
     transition: all 0.25s ease-in-out;
     display: flex;
