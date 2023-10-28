@@ -84,7 +84,6 @@ function newSquare(){
     square.style.width = '10%';
     square.style.aspectRatio = 1;
     square.className = 'square';
-    /*square.classList.add('last_grace');*/
     return square;
 }
 function sleep(ms) {
@@ -116,13 +115,10 @@ async function remove_class_effect(elements_array, class_name, wait_ms){
         element.classList.remove(class_name);
     });
 }
-
 async function last_grace_effect(squares, color, time_ms){
     console.log(squares);
     squares.forEach(square => {
         square.style.transition = 'all 0.25s ease-in-out';
-        /*square.style.boxShadow = '0 0 0.05rem 0.5rem #FF8080, 0 0 0px 0 rgba(0,0,0,0)';*/
-        /*square.style.outline = '0.5rem solid '+color;*/
         square.style.border = '0.16rem solid white';
     });
     await sleep(time_ms);

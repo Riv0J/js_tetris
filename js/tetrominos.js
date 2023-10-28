@@ -36,3 +36,7 @@ const lTetromino = [
   ]
 
 const theTetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino]
+
+function getRandomTetrominoIndex(){
+  return Math.floor(Math.random()*theTetrominoes.length);
+}

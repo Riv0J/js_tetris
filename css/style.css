@@ -143,9 +143,6 @@ body{
     border-radius: 0.5rem;
     outline: 1rem black;
 }
-#grid > .square{
-    z-index: 1000;
-}
 #aside{
     transition: all 0.25s ease-in-out;
     display: flex;
@@ -171,15 +168,15 @@ body{
 #aside span{
     gap: 0.4rem;
 }
-#aside span > *{
-    gap: 0.2em;
-}
-#next_shape{
+#next{
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+
     aspect-ratio: 1;
     width: 100%;
-    border: 0.1rem solid #80808077;
     border-radius: 0.5rem;
-
 }
 #score{
     text-wrap: nowrap;
@@ -210,10 +207,21 @@ body{
     background-color: rgba(128, 128, 128);
     opacity: 0.2;
 }
-.tetromino{
-    overflow: hidden;
-    border: 0.12rem solid black;
+.square{
     border-radius: 0.25rem;
+}
+.tetromino{
+    overflow: hidden !important;
+    border: 0.12rem solid black !important;
+}
+.projection{
+    position: relative;
+    border-style: solid;
+    border-width: 0.10rem;
+}
+.projection::before{
+    transition: all 0.25s ease-in-out;
+
 }
 .blink{
     position: relative;
