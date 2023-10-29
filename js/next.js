@@ -20,6 +20,9 @@ async function drawNext(next_random){
 }
 
 function resetNext(){
+    if(next_squares == null){
+        return;
+    }
     next_squares.forEach(square =>{
         square.classList.remove('tetromino');
         square.style.backgroundColor = '';

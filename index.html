@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,7 +19,10 @@
         <div id="game_container">
             <div id="grid">
                 <div id='watermark'>
-                    <h5>Tetris</h5>
+                    <h5></h5>
+                </div>
+                <div id='announce_container'>
+                    <h6 id='announce'></h6>
                 </div>
             </div>
             <aside id="aside">
@@ -32,12 +36,16 @@
                         <h4 id='lines'>000</h4>
                     </span>
                     <span>
-                        <h3>NEXT</h3>
-                        <div id="next">
-                        </div>
+                        <h3>DIFFICULTY</h3>
+                        <h4 id='difficulty'><img id='difficulty_icon' src="img/danger.svg">0</h4>
                     </span>
                     <span>
+                        <h3>NEXT</h3>
+                        <div id="next"></div>
+                    </span>
+                    <span id="buttons_container">
                         <button class="game_button start_button" id="main_button" onclick='menu_button(this)'>Start</button>
+                        <button class="game_button restart_button" id="restart" onclick='restart(this)'>Restart</button>
                     </span>
                 </article>
                 <article id="bot">
@@ -54,12 +62,15 @@
 <script src='js/Icons.js'></script>
 <script src='js/init.js'></script>
 <script src='js/tetrominos.js'></script>
+<script src='js/difficulty.js'></script>
 <script src='js/tetris_colors.js'></script>
+<script src='js/announce.js'></script>
 <script src='js/timer.js'></script>
 <script src='js/score.js'></script>
 <script src='js/lines.js'></script>
 <script src='js/next.js'></script>
 <script src='js/next_tetrominoes.js'></script>
 <script src='js/projection.js'></script>
+<script src='js/grid_effects.js'></script>
 <script src='js/main.js'></script>
 <script src='js/game_controller.js'></script>

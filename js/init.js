@@ -89,9 +89,6 @@ function newSquare(){
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-async function grid_blink(){
-    await class_effect(grid_squares, 'blink', 1500);
-}
 async function line_completed_effect(line_squares){
     await class_effect(line_squares, 'shine', 1000);
 }

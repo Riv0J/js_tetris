@@ -29,6 +29,11 @@ function resetTimer() {
 function updateTimer() {
     let minutos = Math.floor(timer_seconds / 60);
     let segundos = timer_seconds % 60;
+
+    //cada 30 sec aumentar dificultad
+    if (segundos % 15 === 0){
+        increaseDifficulty();
+    }
     if (segundos < 10 && minutos >= 1) {
         segundos = '0' + segundos;
     }

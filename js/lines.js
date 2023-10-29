@@ -26,19 +26,16 @@ async function checkLines(){
     if(lines_completed === 0){
       return lines_completed;
     }
-    let squares_to_replenish = squares_to_delete.length;
-    await line_completed_effect(squares_to_delete);
-    destroyLines(squares_to_delete);
 
-    //restablecer grid_squares
-    for (let index = 0; index < squares_to_replenish; index++) {
-      const square = newSquare();
-      grid.insertBefore(square,grid.firstChild);
-      grid_squares.unshift(square);
-      square.className = 'square';
-    }
+    //efecto visual de css con js
+    await line_completed_effect(squares_to_delete);
+    //destruir los cuadrados de las lineas
+    destroyLines(squares_to_delete);
+    //reabastecer los cuadrados destruidos
+    replenishLines(squares_to_delete.length);
+    //refrescar lso cuadrados en el array, con nuevas posiciones
     refresh_grid_squares();
-    //console.log(grid_squares.length);
+
     console.log(lines_completed+', TOTAL LINES JUST COMPLETED');
     total_lines += lines_completed;
     updateLines();
@@ -56,10 +53,17 @@ async function checkLines(){
     total_lines = 0;
     updateLines();
   }
-
   function destroyLines(squares_array){
     for (let index = 0; index < squares_array.length; index++) {
       const square = squares_array[index];
       grid.removeChild(square)
+    }
+  }
+  function replenishLines(squares_number){
+    for (let index = 0; index < squares_number; index++) {
+      const square = newSquare();
+      grid.insertBefore(square,grid.firstChild);
+      grid_squares.unshift(square);
+      square.className = 'square';
     }
   }

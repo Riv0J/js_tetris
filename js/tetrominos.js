@@ -1,4 +1,4 @@
-const width= 10;
+const width = 10;
 //The Tetrominoes
 const lTetromino = [
     [1, width+1, width*2+1, 2],

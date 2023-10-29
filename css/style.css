@@ -10,6 +10,9 @@
     --button_pause1: #b1ff94;
     --button_pause2: #5eb93d;
     --button_pause3: #419822;
+    --button_restart1: #ff8080; /* Rojo claro */
+    --button_restart2: #ff3333; /* Rojo medio */
+    --button_restart3: #cc0000; /* Rojo oscuro */
 }
 *{
     user-select: none;
@@ -30,6 +33,7 @@ h3{
     font-weight: 700;
     letter-spacing: 0.1rem;
     transform: scaleY(1.5);
+    text-shadow: 0.1rem 0.1rem black;
 }
 h4{
     font-size: 1.5rem;
@@ -109,6 +113,14 @@ button[type=nav]:hover svg, button[type=nav]:hover{
     color: var(--neutral-clear-bg);
     background: linear-gradient(131deg, var(--button_pause1) 0%, var(--button_pause3) 40%);
 }
+.restart_button:hover{
+    color: var(--neutral-dark-bg);
+    background: linear-gradient(131deg, var(--button_restart1) 0%, var(--button_restart2) 100%);
+}
+.restart_button {
+    color: var(--neutral-clear-bg);
+    background: linear-gradient(131deg, var(--button_restart1) 0%, var(--button_restart3) 40%);
+}
 button{
     cursor: pointer;
 }
@@ -160,13 +172,32 @@ body{
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-
 }
 #aside > article{
     gap: 1.2rem;
 }
 #aside span{
     gap: 0.4rem;
+}
+#restart{
+    display: none;
+}
+#buttons_container{
+    gap: 1rem !important;
+}
+#difficulty{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+#difficulty_icon{
+    display: none;
+    width: 1.25rem;
+    aspect-ratio: 1;
+    transition: all 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
 }
 #next{
     position: relative;
@@ -198,6 +229,27 @@ body{
     opacity: 0.4;
     z-index: -1;
 }
+#announce_container{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 1000;
+    transform: scaleY(1.5);
+}
+#announce {
+    letter-spacing: 0.2rem;
+    font-weight: 700;
+    font-size: 3rem;
+    text-transform: uppercase;
+    font-family: 'Teko', sans-serif;
+    text-align: center;
+    color: #FFFFFF;
+    opacity: 0;
+    text-shadow: 0.1rem 0.1rem black;
+}
 .grayed_out::before {
     content: '';
     position: absolute;
@@ -206,6 +258,11 @@ body{
     inset: 0;
     background-color: rgba(128, 128, 128);
     opacity: 0.2;
+}
+.bounceInDown{
+    animation-name: bounceInDown;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
 }
 .square{
     border-radius: 0.25rem;
@@ -221,7 +278,6 @@ body{
 }
 .projection::before{
     transition: all 0.25s ease-in-out;
-
 }
 .blink{
     position: relative;
@@ -272,3 +328,35 @@ body{
         opacity: 0;
     }
 }
+@keyframes bounceInDown {
+    from,
+    60%,
+    75%,
+    90%,
+    to {
+      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+  
+    0% {
+      opacity: 0;
+      transform: translate3d(0, -3000px, 0) scaleY(3);
+    }
+  
+    60% {
+      opacity: 1;
+      transform: translate3d(0, 25px, 0) scaleY(0.9);
+    }
+  
+    75% {
+      transform: translate3d(0, -10px, 0) scaleY(0.95);
+    }
+  
+    90% {
+      transform: translate3d(0, 5px, 0) scaleY(0.985);
+    }
+  
+    to {
+        opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }

@@ -1,6 +1,8 @@
 //variables DOM
 const main_button = document.getElementById('main_button');
+const extra_restart_button = document.getElementById('restart');
 const watermark_container = document.getElementById('watermark');
+const restart_button = document.getElementById('restart');
 
 const CLASS_START_BUTTON= 'start_button';
 const CLASS_PAUSE_BUTTON= 'pause_button';
@@ -11,7 +13,8 @@ const CLASS_RESTART_BUTTON= 'restart_button';
 const TICK_MS = 700;
 const TICK_MS_MOVE_SIDES = 215;
 
-let FREEZE_TIME_MS = TICK_MS/2;
+let CURRENT_TICK = TICK_MS;
+let FREEZE_TIME_MS = CURRENT_TICK/2;
 let GAME_RESET_TIME_MS = 1000;
 
 const GAME_STATE_NONE = 0;
@@ -35,16 +38,29 @@ async function menu_button(button){
           await resume_game();
           break;
       case GAME_STATE_OVER:
-          await reset_game();
-          await start_game();
+          await restart();
           break;
       default:
           break;
   }
 }
+async function restart(){
+  await reset_game();
+  await start_game();
+}
 function change_game_state(new_state){
   switch (new_state) {
       case GAME_STATE_RUNNING:
+          restart_button.style.display = 'block';
+          break;
+      case GAME_STATE_PAUSED:
+          restart_button.style.display = 'block';
+          break;
+      case GAME_STATE_NONE:
+          restart_button.style.display = 'none';
+          break;
+      case GAME_STATE_OVER:
+          restart_button.style.display = 'block';
           break;
       default:
           break;
@@ -91,10 +107,9 @@ function undraw() {
 }
 async function moveDown() {
     if(current_game_state != GAME_STATE_RUNNING || checking_lines === true){
-      console.log('condition not met: ', current_game_state, checking_lines)
+      console.log('moveDown stopped: current_game_state='+current_game_state+', checking lines='+checking_lines)
       return;
     }
-    console.log('movin')
     undraw()
     currentPosition += width
     draw()
@@ -105,12 +120,12 @@ async function moveDown() {
       checking_lines = true;
       freezeTetromino();
       //cant move down, check if lines have been completed
-      const square_elements_current_tetromino = await getCurrentTetrominoSquares();
       const lines_completed = await checkLines();
       let score_gained = calculateScore(lines_completed);
-      /*console.log('lines completed = '+lines_completed);
-      console.log('score gained = '+score_gained);*/
       addScore(score_gained);
+      if(lines_completed > 0){
+        announceTextAsync([`+${lines_completed} lines`,`+${score_gained} score`], 2000);
+      }
       if(steps_this_tetromino == 0){
         game_over();
         return;
@@ -256,7 +271,6 @@ function nextRotationBlocked(){
   }
   const rotated_tetromino = theTetrominoes[random_number][next_rotation];
   const rotated_squares = getTetrominoSquares(rotated_tetromino);
-  console.log(rotated_squares);
         //este bucle es un guardia de si el tetromino ha llegado al final
         for (let index of rotated_tetromino) {
           if (!grid_squares[currentPosition + index + width]) {
@@ -275,7 +289,7 @@ function pause_game(){
   main_button.classList.remove(CLASS_PAUSE_BUTTON);
   main_button.classList.add(CLASS_RESUME_BUTTON);
   main_button.textContent = 'Resume';
-  gray_grid();
+  gray_grid(true);
   pauseTimer();
   change_game_state(GAME_STATE_PAUSED);
 }
@@ -283,41 +297,44 @@ async function resume_game(){
   main_button.classList.remove(CLASS_RESUME_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
-  gray_grid();
+  gray_grid(false);
   resumeTimer();
   change_game_state(GAME_STATE_RUNNING);
   await moveDown();
 }
 async function start_game(){
+  main_button.style.display = 'block';
   main_button.classList.remove(CLASS_START_BUTTON);
   main_button.classList.add(CLASS_PAUSE_BUTTON);
   main_button.textContent = 'Pause';
   watermark_container.style.display = 'flex';
   change_game_state(GAME_STATE_RUNNING);
-
+  announceTextAsync([`Start!`], 2000);
   startTimer();
   newTetromino();
   await moveDown();
 }
 async function reset_game(){
-  gray_grid();
+  change_game_state(GAME_STATE_NONE);
+  gray_grid(false);
   resetTimer();
   resetLines();
   resetScore();
   resetNext();
+  resetTicks();
+  resetDifficulty();
   await resetSquares();
   grid_blink();
   checking_lines = false;
   await sleep(GAME_RESET_TIME_MS);
 }
 function game_over(){
-  main_button.classList.remove(CLASS_PAUSE_BUTTON);
-  main_button.classList.add(CLASS_RESUME_BUTTON);
-  main_button.textContent = 'Restart';
-  gray_grid();
+  main_button.style.display = 'none';
+  gray_grid(true);
   //run
   stopTimer();
   change_game_state(GAME_STATE_OVER);
+  announceTextAsync([`Game Over`], 2000);
   console.log('GAME OVER!');
 }
 function refresh_grid_squares(){
@@ -328,19 +345,11 @@ function refresh_grid_squares(){
   });
   console.log(grid_squares.length+', TOTAL SQUARES IN GRID_SQUARES');
 }
-function gray_grid(){
-  const is_screen_gray = grid.classList.contains('grayed_out');
-  if(is_screen_gray == true){
-    grid.classList.remove('grayed_out');
-  } else{
-    grid.classList.add('grayed_out');
-  }
-}
 //smart sleeps
 async function moveDownSleep(){
   const loops = 32;
   for(i = 0; i < loops; i++){
-    await sleep(TICK_MS/loops);
+    await sleep(CURRENT_TICK/loops);
     if(hold_move_down === true){
       break;
     }
@@ -370,4 +379,8 @@ function getTetrominoSquares(tetromino){
     squares.push(square);
   });
   return squares;
+}
+function resetTicks(){
+  CURRENT_TICK = TICK_MS;
+  FREEZE_TIME_MS = CURRENT_TICK/2;
 }
