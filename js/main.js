@@ -107,18 +107,14 @@ function undraw() {
 }
 async function moveDown() {
     if(current_game_state != GAME_STATE_RUNNING || checking_lines === true){
-      console.log('moveDown stopped: current_game_state='+current_game_state+', checking lines='+checking_lines)
+      //console.log('moveDown stopped: current_game_state='+current_game_state+', checking lines='+checking_lines)
       return;
     }
-    undraw()
-    currentPosition += width
-    draw()
-
     //can current tetromino move down next run???
     const can_move_down = canMoveDown();
     if(can_move_down === false){
       checking_lines = true;
-      freezeTetromino();
+      await freezeTetromino();
       //cant move down, check if lines have been completed
       const lines_completed = await checkLines();
       let score_gained = calculateScore(lines_completed);
@@ -137,6 +133,9 @@ async function moveDown() {
       checking_lines = false;
     } else if(can_move_down == true){
       steps_this_tetromino +=1;
+      undraw()
+      currentPosition += width
+      draw()
       await moveDownSleep();
     }
     await moveDown();
@@ -154,7 +153,7 @@ function canMoveDown(){
   }
   return true;
 }
-function freezeTetromino(){
+async function freezeTetromino(){
   current_tetromino.forEach(index => {
     const square = grid_squares[currentPosition + index];
     square.classList.add('taken');
@@ -205,7 +204,7 @@ async function newTetromino(){
     draw()
   }
   async function moveSidesHold(){
-    if(moving_sides_loop === true){
+    if(moving_sides_loop === true || checking_lines === true){
       console.log('cannot create duplicate of holding sides')
       return;
     }
@@ -242,8 +241,8 @@ async function newTetromino(){
       }
     }
   }
-function rotate() {
-  const can_rotate = canRotate();
+async function rotate() {
+  const can_rotate = await canRotate();
   if(can_rotate === false){
     return;
   }
@@ -258,32 +257,42 @@ function rotate() {
   checkRotatedPosition()
   draw()
 }
-function canRotate(){
+async function canRotate(){
   if(current_game_state != GAME_STATE_RUNNING || checking_lines === true){
     return false;
   }
-  return nextRotationBlocked();
+  let can_rotate = false;
+  const is_next_rotation_blocked= await nextRotationBlocked();
+  if(is_next_rotation_blocked === true){
+    can_rotate = false;
+  } else {
+    can_rotate = true;
+  }
+  return can_rotate;
 }
-function nextRotationBlocked(){
+async function nextRotationBlocked(){
   let next_rotation = currentRotation+1;
   if(next_rotation === current_tetromino.length) { 
     next_rotation = 0
   }
+  //este bucle es un guardia de si el tetromino ha llegado al final
   const rotated_tetromino = theTetrominoes[random_number][next_rotation];
-  const rotated_squares = getTetrominoSquares(rotated_tetromino);
-        //este bucle es un guardia de si el tetromino ha llegado al final
-        for (let index of rotated_tetromino) {
-          if (!grid_squares[currentPosition + index + width]) {
-            return false;
-          }
-        }
-  rotated_squares.forEach(square => {
-    if(square.classList.contains('taken')){
-      console.log('blocked');
-      return false;
+  for (let index of rotated_tetromino) {
+    if (!grid_squares[currentPosition + index + width]) {
+      return true;
     }
-  })
-  return true;
+  }
+
+  //este bucle es otro guardia si alguno de los cuadrados ya esta taken
+  const rotated_squares = getTetrominoSquares(rotated_tetromino);
+  for (let index = 0; index < rotated_squares.length; index++) {
+    const square = rotated_squares[index];
+    if(square.classList.contains('taken')){
+      return true;
+    }
+    
+  }
+  return false;
 }
 function pause_game(){
   main_button.classList.remove(CLASS_PAUSE_BUTTON);
@@ -323,6 +332,7 @@ async function reset_game(){
   resetNext();
   resetTicks();
   resetDifficulty();
+  announceTextRemove();
   await resetSquares();
   grid_blink();
   checking_lines = false;
@@ -334,7 +344,7 @@ function game_over(){
   //run
   stopTimer();
   change_game_state(GAME_STATE_OVER);
-  announceTextAsync([`Game Over`], 2000);
+  announceTextAsync([`Game Over`], 5000);
   console.log('GAME OVER!');
 }
 function refresh_grid_squares(){
@@ -356,7 +366,7 @@ async function moveDownSleep(){
   }
 }
 async function moveSidesSleep(){
-  const loops = 5;
+  const loops = 2;
   for(i = 0; i < loops; i++){
     await sleep(TICK_MS_MOVE_SIDES/loops);
     if(moving_left === false && moving_right === false){
