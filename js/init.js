@@ -1,6 +1,7 @@
 const grid = document.getElementById('grid');
 const game_container = document.getElementById('game_container');
-const aside = document.getElementById('aside')
+const aside = document.getElementById('aside');
+const watermark = document.getElementById('watermark');
 let grid_squares = [];
 
 const VERTICAL_PADDING = 0.2;
@@ -15,6 +16,9 @@ const TOTAL_GAME_WIDTH = GRID_WIDTH + ASIDE_CONTAINER_WIDTH /*+ (VERTICAL_PADDIN
 async function init(){
     resizeGrid();
     resetSquares();
+    const h2 = document.createElement('h2');
+    h2.appendChild(document.createTextNode('Rivo José Molina Uriarte'));
+    watermark.appendChild(h2);
 }
 document.addEventListener("DOMContentLoaded", function () {
     init();
